@@ -69,8 +69,8 @@ function getWidgetTemplate(id,file) {
 
 
 
-        // file.addRequire(stystem+":"+widgetPath);
-        file.addAsyncRequire(stystem+":"+widgetPath);
+        file.addRequire(stystem+":"+widgetPath);
+        // file.addAsyncRequire(stystem+":"+widgetPath);
 
         template = fis.util.read(outputPath+"/"+media+"/template" + uri);
     }
