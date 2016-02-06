@@ -1,7 +1,7 @@
 var projectPath = fis.project.getProjectPath();
 
-// 获取项目名称
-var project = require(projectPath+'/package.json').name;
+// 获取当前项目名称
+var currentProject = require(projectPath+'/package.json').name;
 
 // 输出路径
 var outputPath = "../../output";
@@ -36,10 +36,9 @@ function getWidgetTemplate(id,file) {
 
     var ret = id.split(":").reverse();
 
-    var project = fis.get("project");
 
     //子系统，没指定为当前子系统
-    var stystem = ret[1] || project;
+    var project = ret[1] || currentProject;
 
     //组件名
     var name = ret[0];
@@ -48,7 +47,7 @@ function getWidgetTemplate(id,file) {
 
 
     //如果是本系统或者没指定子系统
-    if (stystem == project) {
+    if (project == currentProject) {
 
         // 通过该方式进行资源定位，绝对路径
         template = '<link rel="import" href="/' + widgetPath + '?__inline">';
@@ -56,21 +55,21 @@ function getWidgetTemplate(id,file) {
 
         //跨系统
     } else {
-        var version = require(projectPath+"/../common/package.json").version;
+        var version = require(projectPath+"/../"+project+"/package.json").version;
         var media = fis.project.currentMedia() || "dev";
 
         // 跨系统获取资源依赖表
-        var mapPath = projectPath+"/"+outputPath+"/" + media + "/map/" + stystem + "/" + version + "/map.json";
+        var mapPath = projectPath+"/"+outputPath+"/" + media + "/map/" + project + "/" + version + "/map.json";
 
 
         var map = require(mapPath);
 
-        var uri = map.res[stystem+":"+widgetPath].uri;
+        var uri = map.res[project+":"+widgetPath].uri;
 
 
 
-        file.addRequire(stystem+":"+widgetPath);
-        // file.addAsyncRequire(stystem+":"+widgetPath);
+        file.addRequire(project+":"+widgetPath);
+        // file.addAsyncRequire(project+":"+widgetPath);
 
         template = fis.util.read(outputPath+"/"+media+"/template" + uri);
     }
