@@ -4,7 +4,7 @@ var projectPath = fis.project.getProjectPath();
 var currentProject = require(projectPath+'/package.json').name;
 
 // 输出路径
-var outputPath = "../../output";
+var outputPath = "../../_output";
 
 //匹配组件标签<w-widget></w-widget>
 var regString = "<widget([^>]+)*>(.*)<\\/widget>";
