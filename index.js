@@ -13,7 +13,7 @@ module.exports = function(content, file, conf) {
 
     outputPath = conf.outputPath || "../../outputPath";
 
-    //匹配组件标签<w-widget></w-widget>
+    //匹配组件标签
     var regString = "<" + tagName + "([^>]+)*>(.*)<\\/" + tagName + ">";
 
     var pattern = new RegExp(regString, "gim");
