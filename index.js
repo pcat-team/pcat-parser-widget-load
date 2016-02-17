@@ -7,27 +7,38 @@ var project = require(projectPath + '/package.json').name;
 
 var tagName, outputPath;
 
+var count = 0;
+
 module.exports = function(content, file, conf) {
 
     tagName = conf.tagName || "widget";
 
     outputPath = conf.outputPath || "../../outputPath";
 
-    //匹配组件标签
-    var regString = "<" + tagName + "([^>]+)*>(.*)<\\/" + tagName + ">";
+    //匹配组件标签<w-widget></w-widget>
+    // var regString = "<(" + tagName + ")([^>]+)*>(.*)<\\/\\1>";
+    var regString = "<(" + tagName + ")([^>]+)*>(.*?)<\\/\\1>";
 
     var pattern = new RegExp(regString, "gim");
 
+    // var widgets = content.replace(/<\/widget>/g,"</widget>\n").match(pattern);
     var widgets = content.match(pattern);
 
     if (widgets) {
-        content = content.replace(pattern, function(tag, props) {
+
+        content = content.replace(pattern, function(tag, name,props) {
 
             var propsObj = getPropsObj(props);
 
+            // console.log(props)
+            // console.log(propsObj)
+
             var template = getWidgetTemplate(propsObj["id"], file);
 
-            tag = tag.replace(/>.*<\//, ">" + template + "</");
+            var tagID = tagName+"_"+(count++);
+
+            // tag = tag.replace(/>.*<\//, ">" + template + "</");
+             tag = '<'+tagID+'  ' + props.trim() + '>'+template+'</'+tagID+'>'
 
             return tag;
 
@@ -36,7 +47,6 @@ module.exports = function(content, file, conf) {
 
 
     }
-
 
     return content;
 }
