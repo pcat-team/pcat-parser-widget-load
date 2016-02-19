@@ -1,21 +1,32 @@
+var path = require("path");
+
 var projectPath = fis.project.getProjectPath();
 
-var media = fis.project.currentMedia() || "dev";
-
 // 获取当前项目名称
-var project = require(projectPath + '/package.json').name;
+var project,
 
-var tagName, outputPath;
+    tagName,
 
-var count = 0;
+     mapOutputPath,
+
+    templateOutputPath,
+
+    count = 0;
 
 module.exports = function(content, file, conf) {
 
-    tagName = conf.tagName || "widget";
+    // tagName = conf.tagName || "widget";
+    
+    project = conf.project;
 
-    outputPath = conf.outputPath || "../../outputPath";
+    tagName = conf.tagName;
 
-    //匹配组件标签<w-widget></w-widget>
+    mapOutputPath  = conf.mapOutputPath;
+
+    templateOutputPath = conf.templateOutputPath;
+
+
+    //匹配组件标签如<widget id=""></widget>
     // var regString = "<(" + tagName + ")([^>]+)*>(.*)<\\/\\1>";
     var regString = "<(" + tagName + ")([^>]+)*>(.*?)<\\/\\1>";
 
@@ -29,9 +40,6 @@ module.exports = function(content, file, conf) {
         content = content.replace(pattern, function(tag, name,props) {
 
             var propsObj = getPropsObj(props);
-
-            // console.log(props)
-            // console.log(propsObj)
 
             var template = getWidgetTemplate(propsObj["id"], file);
 
@@ -58,7 +66,8 @@ module.exports = function(content, file, conf) {
 function getWidgetTemplate(id, file) {
 
     if (!id) {
-        fis.log.error("未指定组件id");
+        // fis.log.error("未指定组件id");
+        fis.log.error('组件 [%s]加载失败,请指定组件id', tagName)
     }
 
     var template = "";
@@ -72,37 +81,73 @@ function getWidgetTemplate(id, file) {
     //组件名
     var name = ids[0];
 
-    var widgetPath = tagName + '/' + name + '/' + name + '.html';
+    var widgetTemplate = path.join(tagName,name,name+".html");
 
 
     //如果是本系统或者没指定子系统
     if (namespace == project) {
 
+        if(!fis.util.exists(widgetTemplate)){
+            fis.log.error('组件[%s]不存在', id)
+        }
+
         // 通过该方式进行资源定位，绝对路径
-        template = '<link rel="import" href="/' + widgetPath + '?__inline">';
+        template = '<link rel="import" href="/' + widgetTemplate + '?__inline">';
 
 
         //跨系统
     } else {
-        var version = require(projectPath + "/../" + namespace + "/package.json").version;
+        var version = getProjectVersion(namespace);
 
 
-        // 跨系统获取资源依赖表
-        var mapPath = projectPath + "/" + outputPath + "/" + media + "/map/" + namespace + "/" + version + "/map.json";
+         // 解析跨系统资源依赖表路径
+        var mapPath = path.resolve(mapOutputPath,namespace,version,"map.json");
 
+
+        if(!fis.util.exists(mapPath)){
+            fis.log.error('unable to load map.json [%s]', mapPath)
+        }
+
+        // 获取跨系统获取资源依赖表
         var map = require(mapPath);
 
-        var uri = map.res[namespace + ":" + widgetPath].uri;
+        var id = namespace + ":" + widgetTemplate;
 
-        file.addRequire(namespace + ":" + widgetPath);
+        // 添加依赖
+        file.addRequire(id);
 
-        template = fis.util.read(outputPath + "/" + media + "/template" + uri);
+        var uri = map.res[id].uri;
+
+
+        // 读取跨系统模板
+        var templatePath = path.resolve(templateOutputPath,"./"+uri);
+
+         if(!fis.util.exists(templatePath)){
+            fis.log.error('unable to load template [%s]', templatePath)
+        }
+
+
+        template = fis.util.read(templatePath);
     }
 
 
     return template;
 
 }
+
+// 获取指定项目的版本
+    function getProjectVersion(project){
+        
+        var packagePath = path.resolve(projectPath,"..",project,"package.json");
+
+        if(!fis.util.exists(packagePath)){
+            fis.log.error('unable to load package.json [%s]', packagePath)
+        }
+
+        var version = require(packagePath).version;
+        
+        return version;
+    }
 
 
 
