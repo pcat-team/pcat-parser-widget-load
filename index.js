@@ -81,7 +81,7 @@ function getWidgetTemplate(id, file) {
     //组件名
     var name = ids[0];
 
-    var widgetTemplate = path.join(tagName,name,name+".html");
+    var widgetTemplate =  tagName + '/' + name + '/' + name + '.html';
 
 
     //如果是本系统或者没指定子系统
