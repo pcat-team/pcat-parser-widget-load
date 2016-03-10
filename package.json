@@ -1,48 +1,19 @@
 {
-  "name": "fis3-parser-widget-load",
-  "version": "1.0.4",
-  "description": "组件加载",
+  "name": "pcat-parser-widget-load",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/guoxmin/fis3-parser-widget-load.git"
+    "url": "git+https://github.com/pcat-team/pcat-parser-widget-load.git"
   },
-  "author": {
-    "name": "guoxmin"
-  },
+  "author": "guoxmin",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/guoxmin/fis3-parser-widget-load/issues"
+    "url": "https://github.com/pcat-team/pcat-parser-widget-load/issues"
   },
-  "homepage": "https://github.com/guoxmin/fis3-parser-widget-load#readme",
-  "gitHead": "e7f97312a73134f294ae47284126920eff9ce3ed",
-  "_id": "fis3-parser-widget-load@1.0.1",
-  "_shasum": "c9aaded3cc5cc9c676c8d3331c4590e0eb1e66cc",
-  "_from": "fis3-parser-widget-load@>=1.0.1 <2.0.0",
-  "_npmVersion": "2.14.12",
-  "_nodeVersion": "4.2.6",
-  "_npmUser": {
-    "name": "guoxmin",
-    "email": "guo469477762@gmail.com"
-  },
-  "dist": {
-    "shasum": "9ebecab66cc829110ee5a78ed98b25815773c169",
-    "tarball": "http://registry.npmjs.org/fis3-parser-widget-load/-/fis3-parser-widget-load-1.0.0.tgz"
-  },
-  "maintainers": [
-    {
-      "name": "guoxmin",
-      "email": "guo469477762@gmail.com"
-    }
-  ],
-  "_npmOperationalInternal": {
-    "host": "packages-5-east.internal.npmjs.com",
-    "tmp": "tmp/fis3-parser-widget-load-1.0.0.tgz_1455522083393_0.9597643956076354"
-  },
-  "directories": {},
-  "_resolved": "https://registry.npmjs.org/fis3-parser-widget-load/-/fis3-parser-widget-load-1.0.0.tgz",
-  "readme": "ERROR: No README data found!"
+  "homepage": "https://github.com/pcat-team/pcat-parser-widget-load#readme"
 }
