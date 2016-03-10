@@ -1,6 +1,6 @@
 {
   "name": "fis3-parser-widget-load",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "组件加载",
   "main": "index.js",
   "scripts": {

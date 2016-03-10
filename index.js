@@ -7,23 +7,27 @@ var project,
 
     tagName,
 
-     mapOutputPath,
+    mapOutputPath,
 
     templateOutputPath,
+
+    packageOutputPath,
 
     count = 0;
 
 module.exports = function(content, file, conf) {
 
     // tagName = conf.tagName || "widget";
-    
+
     project = conf.project;
 
     tagName = conf.tagName;
 
-    mapOutputPath  = conf.mapOutputPath;
+    mapOutputPath = conf.mapOutputPath;
 
     templateOutputPath = conf.templateOutputPath;
+
+    packageOutputPath = conf.packageOutputPath;
 
 
     //匹配组件标签如<widget id=""></widget>
@@ -37,16 +41,16 @@ module.exports = function(content, file, conf) {
 
     if (widgets) {
 
-        content = content.replace(pattern, function(tag, name,props) {
+        content = content.replace(pattern, function(tag, name, props) {
 
-            var propsObj = getPropsObj(props);
+            var propsData = getPropsObj(props);
 
-            var template = getWidgetTemplate(propsObj["id"], file);
+            var template = getwidgetTempate(propsData, file);
 
-            var tagID = tagName+"_"+(count++);
+            var tagID = tagName + "_" + (count++);
 
             // tag = tag.replace(/>.*<\//, ">" + template + "</");
-             tag = '<'+tagID+'  ' + props.trim() + '>'+template+'</'+tagID+'>'
+            tag = '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>'
 
             return tag;
 
@@ -63,55 +67,72 @@ module.exports = function(content, file, conf) {
 
 
 //获取组件模板
-function getWidgetTemplate(id, file) {
+function getwidgetTempate(props, file) {
 
-    if (!id) {
-        // fis.log.error("未指定组件id");
-        fis.log.error('组件 [%s]加载失败,请指定组件id', tagName)
+    var widgetName = props.name,
+        widgetVersion = props.version;
+
+    if (!widgetName) {
+        // fis.log.error("未指定组件widgetName");
+        fis.log.error('组件 [%s]加载失败,请指定组件name', tagName)
     }
 
     var template = "";
 
-    var ids = id.split(":").reverse();
+    var ids = widgetName.split(":").reverse();
 
 
     //子系统，没指定为当前子系统
     var namespace = ids[1] || project;
 
+    var latestVersion = getProjectLatestVersion(namespace);
+
+    var widgetVersion = widgetVersion || latestVersion;
+
     //组件名
     var name = ids[0];
+    var widgetDir = getWidgetDir(tagName, name);
 
-    var widgetTemplate =  tagName + '/' + name + '/' + name + '.html';
+    var ret = compareVersion(widgetVersion, latestVersion);
 
 
-    //如果是本系统或者没指定子系统
-    if (namespace == project) {
+    // 大于当前版本
+    if (ret == 3) {
 
-        if(!fis.util.exists(widgetTemplate)){
-            fis.log.error('组件[%s]不存在', id)
+        fis.log.error(' [%s]组件使用的版本[%s]不存在，当前最新版本为[%s]', widgetName, widgetVersion, latestVersion);
+    }
+
+    // 小于当前版本
+    if (ret == 1) {
+        fis.log.warn('组件 [%s]使用旧版本[%s]，当前最新版本为[%s]，请更新或新建组件！[%s]', widgetName, widgetVersion, latestVersion, file.origin);
+
+    }
+
+    // 等于当前版本 && 当前项目
+    if (ret == 2 && namespace == project) {
+
+
+        if (!fis.util.exists(widgetDir)) {
+            fis.log.error('组件[%s]不存在', widgetName)
         }
 
         // 通过该方式进行资源定位，绝对路径
-        template = '<link rel="import" href="/' + widgetTemplate + '?__inline">';
+        template = '<link rel="import" href="/' + widgetDir + '?__inline">';
 
-
-        //跨系统
     } else {
-        var version = getProjectVersion(namespace);
 
 
-         // 解析跨系统资源依赖表路径
-        var mapPath = path.resolve(mapOutputPath,namespace,version,"map.json");
+        // 解析跨系统资源依赖表路径
+        var mapPath = path.resolve(mapOutputPath, namespace, widgetVersion, "map.json");
 
-
-        if(!fis.util.exists(mapPath)){
-            fis.log.error('unable to load map.json [%s]', mapPath)
+        if (!fis.util.exists(mapPath)) {
+            fis.log.error(' 本地未找到该组件[%s]版本[%s]，可通过CI服务器编译测试查看效果！', widgetName, widgetVersion)
         }
 
         // 获取跨系统获取资源依赖表
         var map = require(mapPath);
 
-        var id = namespace + ":" + widgetTemplate;
+        var id = namespace + ":" + widgetDir;
 
         // 添加依赖
         file.addRequire(id);
@@ -120,9 +141,9 @@ function getWidgetTemplate(id, file) {
 
 
         // 读取跨系统模板
-        var templatePath = path.resolve(templateOutputPath,"./"+uri);
+        var templatePath = path.resolve(templateOutputPath, "./" + uri);
 
-         if(!fis.util.exists(templatePath)){
+        if (!fis.util.exists(templatePath)) {
             fis.log.error('unable to load template [%s]', templatePath)
         }
 
@@ -131,23 +152,73 @@ function getWidgetTemplate(id, file) {
     }
 
 
+
     return template;
 
 }
 
-// 获取指定项目的版本
-    function getProjectVersion(project){
-        
-        var packagePath = path.resolve(projectPath,"..",project,"package.json");
+/**
+ * 获取模板路径
+ * @param  {String} tagName    组件标签名，默认为widget
+ * @param  {String} widgetName 组件明
+ * @return {String}            组件路径
+ */
+function getWidgetDir(tagName, widgetName) {
+    return tagName + '/' + widgetName + '/' + widgetName + '.html';
+}
 
-        if(!fis.util.exists(packagePath)){
-            fis.log.error('unable to load package.json [%s]', packagePath)
+
+/**
+ * 对比两个版本大小
+ * @param  {String} v1 版本1
+ * @param  {String} v2 版本2
+ * @return {Number}    1：小于，2：等于，3：大于
+ */
+function compareVersion(v1, v2) {
+    var v1Arr = v1.split("."),
+
+        v2Arr = v2.split(".");
+
+    var ret = 2;
+
+    for (var i = 0; i < 3; i++) {
+        if (v1Arr[i] > v2Arr[i]) {
+            ret = 3;
+            break;
+        } else if (v1Arr[i] < v2Arr[i]) {
+            ret = 1;
+            break;
         }
-
-        var version = require(packagePath).version;
-        
-        return version;
     }
+
+    return ret;
+
+}
+
+
+/**
+ * 获取指定项目的最新版本
+ * @param  {String} project 项目名称
+ */
+function getProjectLatestVersion(namespace) {
+
+    var packagePath = path.resolve(projectPath, "package.json");
+
+    if (namespace != project) {
+
+        packagePath = path.resolve(packageOutputPath, namespace, "package.json");
+
+    }
+
+
+    if (!fis.util.exists(packagePath)) {
+        fis.log.error('package.json加载失败[%s]，尝试先编译[%s]项目！', packagePath, namespace);
+    }
+
+    var version = require(packagePath).version;
+
+    return version;
+}
 
 
 
