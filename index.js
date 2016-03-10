@@ -146,7 +146,7 @@ function getWidgetTemplate(id, file) {
         var packagePath = path.resolve(packageOutputPath,project,"package.json");
 
         if(!fis.util.exists(packagePath)){
-            fis.log.error('unable to load package.json [%s]', packagePath)
+            fis.log.error('package.json加载失败[%s]，尝试先编译[%s]项目！', packagePath, project);
         }
 
         var version = require(packagePath).version;
