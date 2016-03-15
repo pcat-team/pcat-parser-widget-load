@@ -46,12 +46,14 @@ module.exports = function(content, file, conf) {
 
             var propsObj = getPropsObj(props);
 
-            var template = getWidgetTemplate(propsObj["name"], file);
+            var widgetName = propsObj["name"];
+
+            var template = getWidgetTemplate(widgetName, file);
 
             var tagID = tagName+"_"+(count++);
 
             // tag = tag.replace(/>.*<\//, ">" + template + "</");
-             tag = '<'+tagID+'  ' + props.trim() + '>'+template+'</'+tagID+'>'
+             tag = '<!--'+widgetName+' start-->\n'+'<'+tagID+'  ' + props.trim() + '>'+template+'</'+tagID+'>'+'\n<!--'+widgetName+' end-->'
 
             return tag;
 
