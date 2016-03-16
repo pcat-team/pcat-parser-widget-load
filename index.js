@@ -2,6 +2,7 @@ var path = require("path");
 
 var projectPath = fis.project.getProjectPath();
 
+
 // 获取当前项目名称
 var project,
 
@@ -118,12 +119,16 @@ function getWidgetTemplate(id, file) {
         // 获取跨系统获取资源依赖表
         var map = require(mapPath);
 
-        var id = namespace + ":" + widgetTemplate;
+        var tplDir = namespace + ":" + widgetTemplate;
 
         // 添加依赖
-        file.addRequire(id);
+        file.addRequire(tplDir);
 
-        var uri = map.res[id].uri;
+        if(!map.res[tplDir]){
+            fis.log.error('组件[%s]不存在', id)
+        }
+
+        var uri = map.res[tplDir].uri;
 
 
         // 读取跨系统模板
