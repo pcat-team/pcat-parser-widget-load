@@ -1,5 +1,5 @@
 var path = require("path");
-
+var fs = require("fs");
 var projectPath = fis.project.getProjectPath();
 
 
@@ -8,23 +8,23 @@ var project,
 
     tagName,
 
-     mapOutputPath,
+    mapOutputPath,
 
     templateOutputPath,
 
-    packageOutputPath ,
+    packageOutputPath,
 
     count = 0;
 
 module.exports = function(content, file, conf) {
 
     // tagName = conf.tagName || "widget";
-    
+
     project = conf.project;
 
     tagName = conf.tagName;
 
-    mapOutputPath  = conf.mapOutputPath;
+    mapOutputPath = conf.mapOutputPath;
 
     templateOutputPath = conf.templateOutputPath;
 
@@ -43,18 +43,18 @@ module.exports = function(content, file, conf) {
 
     if (widgets) {
 
-        content = content.replace(pattern, function(tag, name,props) {
+        content = content.replace(pattern, function(tag, name, props) {
 
             var propsObj = getPropsObj(props);
 
             var widgetName = propsObj["name"];
 
-            var template = getWidgetTemplate(widgetName, file);
+            var template = getWidgetTemplate(propsObj, file);
 
-            var tagID = tagName+"_"+(count++);
+            var tagID = tagName + "_" + (count++);
 
             // tag = tag.replace(/>.*<\//, ">" + template + "</");
-             tag = '<!--'+widgetName+' start-->\n'+'<'+tagID+'  ' + props.trim() + '>'+template+'</'+tagID+'>'+'\n<!--'+widgetName+' end-->'
+            tag = '<!--' + widgetName + ' start-->\n' + '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>' + '\n<!--' + widgetName + ' end-->'
 
             return tag;
 
@@ -71,12 +71,25 @@ module.exports = function(content, file, conf) {
 
 
 //获取组件模板
-function getWidgetTemplate(id, file) {
+function getWidgetTemplate(props, file) {
+
+
+    var id = props["name"];
+
+    
 
     if (!id) {
         // fis.log.error("未指定组件id");
-        fis.log.error('组件 [%s]加载失败,请指定组件id', tagName)
+        fis.log.error('[%s]未指定组件名"name"', tagName)
     }
+
+    var version = props["version"];
+
+    if(!version){
+        fis.log.error('组件 [%s]未指定版本"version"', id)
+    }
+
+       
 
     var template = "";
 
@@ -86,17 +99,19 @@ function getWidgetTemplate(id, file) {
     //子系统，没指定为当前子系统
     var namespace = ids[1] || project;
 
+    
+
     //组件名
     var name = ids[0];
 
-    var widgetTemplate =  tagName + '/' + name + '/' + name + '.html';
+    var widgetTemplate = tagName + '/' + name + '/' +version+'/'+ name + '.html';
 
 
     //如果是本系统或者没指定子系统
     if (namespace == project) {
 
-        if(!fis.util.exists(widgetTemplate)){
-            fis.log.error('组件[%s]不存在', id)
+        if (!fis.util.exists(widgetTemplate)) {
+            fis.log.error('组件[%s]版本[%s]不存在', id,version)
         }
 
         // 通过该方式进行资源定位，绝对路径
@@ -105,14 +120,14 @@ function getWidgetTemplate(id, file) {
 
         //跨系统
     } else {
-        var version = getProjectVersion(namespace);
+        // var version = getProjectVersion(namespace);
 
 
-         // 解析跨系统资源依赖表路径
-        var mapPath = path.resolve(mapOutputPath,namespace,version,"map.json");
+        // 解析跨系统资源依赖表路径
+        var mapPath = path.resolve(mapOutputPath, namespace, "map.json");
 
 
-        if(!fis.util.exists(mapPath)){
+        if (!fis.util.exists(mapPath)) {
             fis.log.error('unable to load map.json [%s]', mapPath)
         }
 
@@ -124,7 +139,7 @@ function getWidgetTemplate(id, file) {
         // 添加依赖
         file.addRequire(tplDir);
 
-        if(!map.res[tplDir]){
+        if (!map.res[tplDir]) {
             fis.log.error('组件[%s]不存在', id)
         }
 
@@ -132,9 +147,9 @@ function getWidgetTemplate(id, file) {
 
 
         // 读取跨系统模板
-        var templatePath = path.resolve(templateOutputPath,"./"+uri);
+        var templatePath = path.resolve(templateOutputPath, "./" + uri);
 
-         if(!fis.util.exists(templatePath)){
+        if (!fis.util.exists(templatePath)) {
             fis.log.error('unable to load template [%s]', templatePath)
         }
 
@@ -147,19 +162,21 @@ function getWidgetTemplate(id, file) {
 
 }
 
+
+
 // 获取指定项目的版本
-    function getProjectVersion(project){
-        
-        var packagePath = path.resolve(packageOutputPath,project,"package.json");
+function getProjectVersion(project) {
 
-        if(!fis.util.exists(packagePath)){
-            fis.log.error('package.json加载失败[%s]，尝试先编译[%s]项目！', packagePath, project);
-        }
+    var packagePath = path.resolve(packageOutputPath, project, "package.json");
 
-        var version = require(packagePath).version;
-        
-        return version;
+    if (!fis.util.exists(packagePath)) {
+        fis.log.error('package.json加载失败[%s]，尝试先编译[%s]项目！', packagePath, project);
     }
+
+    var version = require(packagePath).version;
+
+    return version;
+}
 
 
 
