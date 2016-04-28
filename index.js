@@ -1,3 +1,4 @@
+
 var path = require("path");
 var fs = require("fs");
 var projectPath = fis.project.getProjectPath();
@@ -6,15 +7,15 @@ var projectPath = fis.project.getProjectPath();
 // 获取当前项目名称
 var project,
 
-    tagName,
+tagName,
 
-    mapOutputPath,
+mapOutputPath,
 
-    templateOutputPath,
+templateOutputPath,
 
-    packageOutputPath,
+packageOutputPath,
 
-    count = 0;
+count = 0;
 
 module.exports = function(content, file, conf) {
 
@@ -76,7 +77,7 @@ function getWidgetTemplate(props, file) {
 
     var id = props["name"];
 
-    
+
 
     if (!id) {
         // fis.log.error("未指定组件id");
@@ -85,11 +86,11 @@ function getWidgetTemplate(props, file) {
 
     var version = props["version"];
 
-    if(!version){
+    if (!version) {
         fis.log.error('组件 [%s]未指定版本"version"', id)
     }
 
-       
+
 
     var template = "";
 
@@ -99,19 +100,19 @@ function getWidgetTemplate(props, file) {
     //子系统，没指定为当前子系统
     var namespace = ids[1] || project;
 
-    
+
 
     //组件名
     var name = ids[0];
 
-    var widgetTemplate = tagName + '/' + name + '/' +version+'/'+ name + '.html';
+    var widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.html';
 
 
     //如果是本系统或者没指定子系统
     if (namespace == project) {
 
         if (!fis.util.exists(widgetTemplate)) {
-            fis.log.error('组件[%s]版本[%s]不存在', id,version)
+            fis.log.error('组件[%s]版本[%s]不存在', id, version)
         }
 
         // 通过该方式进行资源定位，绝对路径
@@ -181,7 +182,7 @@ function getProjectVersion(project) {
 
 
 //匹配标签的属性和值 k=v
-var prostr = /(\S+)\s*\=\s*("[^"]*")|('[^']*')/gi;
+var prostr = /(\S+)\s*\=\s*(("[^"]*")|('[^']*'))/gi;
 
 // 获取属性对象
 function getPropsObj(props) {
@@ -196,4 +197,4 @@ function getPropsObj(props) {
     }
 
     return obj;
-}
+} 
