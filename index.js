@@ -55,7 +55,7 @@ module.exports = function(content, file, conf) {
             var tagID = tagName + "_" + (count++);
 
             // tag = tag.replace(/>.*<\//, ">" + template + "</");
-            tag = '<!--' + widgetName + ' start-->\n' + '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>' + '\n<!--' + widgetName + ' end-->'
+            tag = '<!--' + widgetName + ' start-->' + '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>' + '<!--' + widgetName + ' end-->'
 
             return tag;
 
@@ -115,8 +115,16 @@ function getWidgetTemplate(props, file) {
             fis.log.error('组件[%s]版本[%s]不存在', id, version)
         }
 
-        // 通过该方式进行资源定位，绝对路径
-        template = '<link rel="import" href="/' + widgetTemplate + '?__inline">';
+        if(props["_fileType"]=="js"){
+
+            // template = "'+__inline('/"+widgetTemplate+"')+'";
+            template ='"+__inline("'+widgetTemplate+'")+"';
+        }else{
+            // 通过该方式进行资源定位，绝对路径
+            template = '<link rel="import" href="/' + widgetTemplate + '?__inline">';
+            
+        }
+
 
 
         //跨系统
