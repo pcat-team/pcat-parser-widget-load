@@ -1,4 +1,3 @@
-
 var path = require("path");
 var fs = require("fs");
 var projectPath = fis.project.getProjectPath();
@@ -7,15 +6,15 @@ var projectPath = fis.project.getProjectPath();
 // 获取当前项目名称
 var project,
 
-tagName,
+    tagName,
 
-mapOutputPath,
+    mapOutputPath,
 
-templateOutputPath,
+    templateOutputPath,
 
-packageOutputPath,
+    packageOutputPath,
 
-count = 0;
+    count = 0;
 
 module.exports = function(content, file, conf) {
 
@@ -115,16 +114,26 @@ function getWidgetTemplate(props, file) {
             fis.log.error('组件[%s]版本[%s]不存在', id, version)
         }
 
-        if(props["_fileType"]=="js"){
+        if (props["_fileType"] == "js") {
 
             // template = "'+__inline('/"+widgetTemplate+"')+'";
-            template ='"+__inline("'+widgetTemplate+'")+"';
-        }else{
+            template = '"+__inline("' + widgetTemplate + '")+"';
+        } else {
             // 通过该方式进行资源定位，绝对路径
             template = '<link rel="import" href="/' + widgetTemplate + '?__inline">';
-            
+
         }
 
+        // 保存当前系统被引用的组件（_wlist页面除外）
+        var iswlist = props["_wlist"];
+
+        if (!iswlist) {
+            var widgetLoad = fis.get("__WIDGETLOADEDLISTS__") || {};
+            if (!widgetLoad[name]) widgetLoad[name] = {};
+            widgetLoad[name][version] = true;
+            fis.set('__WIDGETLOADEDLISTS__', widgetLoad);
+
+        }
 
 
         //跨系统
@@ -205,4 +214,4 @@ function getPropsObj(props) {
     }
 
     return obj;
-} 
+}
