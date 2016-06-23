@@ -54,7 +54,7 @@ module.exports = function(content, file, conf) {
             var tagID = tagName + "_" + (count++);
 
             // tag = tag.replace(/>.*<\//, ">" + template + "</");
-            tag = '<!--' + widgetName + ' start-->' + '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>' + '<!--' + widgetName + ' end-->'
+            tag = '<!--' + widgetName + '-->' + '<' + tagID + '  ' + props.trim() + '>' + template + '</' + tagID + '>' + '<!--/' + widgetName + '-->'
 
             return tag;
 
