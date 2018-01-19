@@ -113,6 +113,13 @@ function getWidgetTemplate(props, file) {
         if (!fis.util.exists(widgetTemplate)) {
             fis.log.error('组件[%s]版本[%s]不存在', id, version)
         }
+        // 用于公共头尾开发
+        // 因为公共头尾使用的是ssi引入
+        // 开发的时候看不到效果
+        // 所以设置开发模式，引入tpl模板
+        if(props["dev"] == "true"){
+            widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.tpl';
+        }
 
         if (props["_fileType"] == "js") {
 
