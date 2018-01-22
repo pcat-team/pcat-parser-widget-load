@@ -117,7 +117,7 @@ function getWidgetTemplate(props, file) {
         // 因为公共头尾使用的是ssi引入
         // 开发的时候看不到效果
         // 所以设置开发模式，引入tpl模板
-        if(props["dev"] == "true"){
+        if(props["dev"] == "true" || props["ext"] == ".tpl"){
             widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.tpl';
         }
 
