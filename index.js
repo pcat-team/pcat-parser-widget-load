@@ -73,6 +73,11 @@ module.exports = function(content, file, conf) {
 //获取组件模板
 function getWidgetTemplate(props, file) {
 
+    // 相当于注释掉，开发的时候，把其他组件先屏蔽掉，方便开发
+    const hidden = props['hidden'];
+
+    if(hidden) return '';
+
 
     var id = props["name"];
 
