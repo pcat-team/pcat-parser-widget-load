@@ -109,7 +109,9 @@ function getWidgetTemplate(props, file) {
     //组件名
     var name = ids[0];
 
-    var widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.html';
+    const ext = props["ext"] || html;
+
+    var widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + ext;
 
 
     //如果是本系统或者没指定子系统
@@ -122,9 +124,9 @@ function getWidgetTemplate(props, file) {
         // 因为公共头尾使用的是ssi引入
         // 开发的时候看不到效果
         // 所以设置开发模式，引入tpl模板
-        if(props["dev"] == "true" || props["ext"] == ".tpl"){
-            widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.tpl';
-        }
+        // if(props["dev"] == "true" || props["ext"] == ".tpl"){
+        //     widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + '.tpl';
+        // }
 
         if (props["_fileType"] == "js") {
 
