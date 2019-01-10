@@ -109,7 +109,7 @@ function getWidgetTemplate(props, file) {
     //组件名
     var name = ids[0];
 
-    const ext = props["ext"] || html;
+    const ext = props["ext"] || ".html";
 
     var widgetTemplate = tagName + '/' + name + '/' + version + '/' + name + ext;
 
